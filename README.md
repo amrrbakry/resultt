@@ -1,8 +1,34 @@
+
 # Resultt
+A simple library to wrap execution result in smart success or error objects.
+```ruby
+success_result = Result do
+  1 + 1
+end
+# => #<Resultt::Success:0x0000000098c718 @value=2>
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/resultt`. To experiment with that code, run `bin/console` for an interactive prompt.
+success_result.success? # true
+success_result.value # 2
+success_result.error? # false
 
-TODO: Delete this and the text above, and describe your gem
+error_result = Result do
+  raise StandardError, 'error result'
+end
+# => #<Resultt::Error:0x000000007c5498 @error=#<StandardError: error result>>
+
+error_result.error? # true
+error_result.error # #<StandardError: error result>
+```
+```ruby
+result = Result do
+  # do something
+end
+
+case result
+when Resultt::Success then 'it is a success!'
+when Resultt::Error then 'oh no! error!'
+end
+```
 
 ## Installation
 
@@ -22,8 +48,48 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+extend `Resultt` in your class and you're good to go!
+```ruby
+class MyClass
+  extend Resultt
 
+  def foo
+    Result do
+      # do something
+    end
+  end
+end
+```
+#### `map` and `map_error`
+it is possible to map on values and errors in `Resultt` objects using `map` and `map_error` respectively:
+```ruby
+result = Result { 1 + 1 }
+# => #<Resultt::Success:0x000000007502d8 @value=2>
+mapped_result = result.map { |value| value + 1 }
+# => #<Resultt::Success:0x000000007502d8 @value=3>
+
+result = Result { raise StandardError, 'error' }
+# => #<Resultt::Error:0x00000000bc8d88 @error=#<StandardError: error>>
+mapped_result = result.map_error { |error| error.class.to_s }
+# => #<Resultt::Error:0x00000000be6568 @error="StandardError">
+```
+#### `Success` and `Error`
+it is also possible to wrap values or errors in `Resultt::Success` or `Resultt::Error` objects directly:
+```ruby
+Success('ok')
+# => #<Resultt::Success:0x0000000076b718 @value="ok">
+Error('err')
+# => #<Resultt::Error:0x00000000764a08 @error="err">
+```
+
+### Nil values
+`Result` will return `Resultt::NilValueError` if the block passed to it evaluates to `nil`. This is to avoid having success results with `nil` values.
+```ruby
+Result do
+  nil
+end
+# => #<Resultt::Error:0x00000000afa000 @error=#<Resultt::NilValueError: Result returned a nil value>>
+```
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
