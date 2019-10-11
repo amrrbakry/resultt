@@ -2,9 +2,11 @@ require "resultt/version"
 require "resultt/result_methods"
 
 module Resultt
+  class NilValueError < StandardError; end;
+
   def Result
     success = Success.new yield
-    raise 'Not found' if success.value.nil?
+    raise NilValueError, 'Resultt returned a nil value' if success.value.nil?
 
     success
   rescue StandardError => e

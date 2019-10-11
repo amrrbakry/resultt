@@ -52,6 +52,20 @@ RSpec.describe Resultt do
     end
   end
 
+  context 'nil values' do
+    let(:result) do
+      Result do
+        nil
+      end
+    end
+
+    it 'returns NilValueError if Result returns nil' do
+      expect(result.class).to eq(Resultt::Error)
+      expect(result.error.class).to eq(Resultt::NilValueError)
+      expect(result.error.message).to eq('Resultt returned a nil value')
+    end
+  end
+
   describe '#map' do
     context 'when success' do
       it 'maps on the value inside Result::Success and returns Result::Success' do
