@@ -5,7 +5,8 @@ module Resultt
   class NilValueError < StandardError; end;
 
   def Result
-    success = Success.new yield
+    value = yield_all(yield)
+    success = Success.new(value)
     raise NilValueError, 'Resultt returned a nil value' if success.value.nil?
 
     success
@@ -57,5 +58,13 @@ module Resultt
       false
     end
     alias success? ok?
+  end
+
+  private
+
+  def yield_all(yielded)
+    return yield_all(yielded.call) if yielded.is_a? Proc
+
+    yielded
   end
 end

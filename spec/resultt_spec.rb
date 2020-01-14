@@ -149,4 +149,15 @@ RSpec.describe Resultt do
       end
     end
   end
+
+  context 'nested blocks inside Result' do
+    let(:level) { proc { 1 + 1 } }
+    let(:level_2) { lambda { level } }
+    let(:level_3) { proc { level_2 } }
+
+    it 'extracts value from nesed blocks inside Result' do
+      result = Result { level_3 }
+      expect(result.value).to eq(2)
+    end
+  end
 end
